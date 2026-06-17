@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gamename</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Main Menu Screen -->
+        <section id="screen-menu" class="screen active">
+            <div class="menu-content">
+                <h1 class="game-title">GAMENAME</h1>
+                <div class="menu-buttons">
+                    <button id="btn-start" class="btn primary">Start Game</button>
+                    <button id="btn-continue" class="btn secondary" disabled>Continue</button>
+                    <button id="btn-settings" class="btn tertiary">Settings</button>
+                </div>
+            </div>
+            
+            <!-- Settings Modal (Hidden by default) -->
+            <div id="modal-settings" class="modal hidden">
+                <div class="modal-content">
+                    <h2>Settings</h2>
+                    <div class="setting-item">
+                        <label for="volume">Volume:</label>
+                        <input type="range" id="volume" min="0" max="100" value="50">
+                    </div>
+                    <button id="btn-close-settings" class="btn tertiary">Close</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Story Screen -->
+        <section id="screen-story" class="screen hidden">
+            <div id="story-background" class="bg-layer"></div>
+            <div id="story-character" class="char-layer hidden"></div>
+            
+            <div id="dialogue-box" class="dialogue-box">
+                <div id="speaker-name" class="speaker-name">Speaker Name</div>
+                <div id="dialogue-text" class="dialogue-text">This is a placeholder dialogue text. Click to continue.</div>
+                <div class="click-indicator">▼</div>
+            </div>
+        </section>
+
+        <!-- Battle Screen -->
+        <section id="screen-battle" class="screen hidden">
+            <div id="battle-background" class="bg-layer"></div>
+            
+            <!-- Enemy Area -->
+            <div class="enemy-area">
+                <div id="enemy-sprite" class="sprite slime"></div>
+                <div class="hp-bar-container">
+                    <div class="hp-label">Slime</div>
+                    <div class="hp-bar"><div id="enemy-hp-fill" class="hp-fill"></div></div>
+                </div>
+            </div>
+
+            <!-- Player Area -->
+            <div class="player-area">
+                <div class="player-stats">
+                    <div class="stat-row">
+                        <span>HP</span>
+                        <div class="hp-bar"><div id="player-hp-fill" class="hp-fill"></div></div>
+                        <span id="player-hp-text">100/100</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>MP</span>
+                        <div class="mp-bar"><div id="player-mp-fill" class="mp-fill"></div></div>
+                        <span id="player-mp-text">20/20</span>
+                    </div>
+                </div>
+
+                <div class="battle-commands">
+                    <button id="cmd-attack" class="btn command">Attack</button>
+                    <button id="cmd-skill" class="btn command">Skill</button>
+                    <button id="cmd-item" class="btn command" disabled>Item</button>
+                    <button id="cmd-flee" class="btn command">Flee</button>
+                </div>
+            </div>
+
+            <div id="battle-log" class="battle-log">
+                A wild slime appeared!
+            </div>
+        </section>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
