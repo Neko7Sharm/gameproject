@@ -202,12 +202,41 @@ function showDialogue() {
     const current = activeScript[gameState.storyIndex];
     const speakerEl = document.getElementById('speaker-name');
     const textEl = document.getElementById('dialogue-text');
+    const charLeft = document.getElementById('char-left');
+    const charRight = document.getElementById('char-right');
     
+    // Always load these images for the demo
+    charRight.style.backgroundImage = "url('assets/sena_idle.png')";
+    charLeft.style.backgroundImage = "url('assets/goddess.png')";
+
     if (current.speaker) {
         speakerEl.textContent = current.speaker;
         speakerEl.style.display = 'block';
+        
+        // Both visible if anyone is speaking in this demo
+        charLeft.classList.remove('hidden');
+        charRight.classList.remove('hidden');
+
+        if (current.speaker === 'Sena') {
+            charRight.classList.add('active-speaker');
+            charRight.classList.remove('inactive-speaker');
+            charLeft.classList.remove('active-speaker');
+            charLeft.classList.add('inactive-speaker');
+        } else if (current.speaker === 'Goddess') {
+            charLeft.classList.add('active-speaker');
+            charLeft.classList.remove('inactive-speaker');
+            charRight.classList.remove('active-speaker');
+            charRight.classList.add('inactive-speaker');
+        } else {
+            charLeft.classList.remove('active-speaker');
+            charLeft.classList.add('inactive-speaker');
+            charRight.classList.remove('active-speaker');
+            charRight.classList.add('inactive-speaker');
+        }
     } else {
         speakerEl.style.display = 'none';
+        charLeft.classList.add('hidden');
+        charRight.classList.add('hidden');
     }
     
     textEl.textContent = current.text;
@@ -215,10 +244,10 @@ function showDialogue() {
 
 // --- Character Creation ---
 let statPoints = 5;
-let tempStats = { dex: 0, int: 0, wis: 0 };
+let tempStats = { str: 0, dex: 0, int: 0, wis: 0 };
 
 function initCharCreate() {
-    ['dex', 'int', 'wis'].forEach(stat => {
+    ['str', 'dex', 'int', 'wis'].forEach(stat => {
         document.getElementById(`btn-inc-${stat}`).addEventListener('click', () => {
             if (statPoints > 0) {
                 tempStats[stat]++;
@@ -236,19 +265,21 @@ function initCharCreate() {
     });
 
     document.getElementById('btn-confirm-char').addEventListener('click', () => {
+        gameState.player.stats.str = tempStats.str;
         gameState.player.stats.dex = tempStats.dex;
         gameState.player.stats.int = tempStats.int;
         gameState.player.stats.wis = tempStats.wis;
         
         activeScript = postCreateScript;
         gameState.storyIndex = -1; // Reset for new script
+        switchScreen('story');
         advanceStory();
     });
 }
 
 function updateCharCreateUI() {
     document.getElementById('stat-points').textContent = statPoints;
-    ['dex', 'int', 'wis'].forEach(stat => {
+    ['str', 'dex', 'int', 'wis'].forEach(stat => {
         document.getElementById(`val-${stat}`).textContent = tempStats[stat];
     });
     
@@ -299,6 +330,7 @@ function initHome() {
 
 function updateHomeUI() {
     document.getElementById('home-hp').textContent = `${gameState.player.hp}/${gameState.player.maxHp}`;
+    document.getElementById('home-str').textContent = gameState.player.stats.str;
     document.getElementById('home-dex').textContent = gameState.player.stats.dex;
     document.getElementById('home-int').textContent = gameState.player.stats.int;
     document.getElementById('home-wis').textContent = gameState.player.stats.wis;
@@ -385,7 +417,7 @@ async function handlePlayerAction(action) {
         await showDiceRoll(`Atk Roll: d20(${atkRoll}) vs AC ${gameState.enemy.ac}`);
         
         if (atkRoll >= gameState.enemy.ac) {
-            const dmg = rollDice(4); // Basic dagger/weapon
+            const dmg = rollDice(4) + gameState.player.stats.str;
             gameState.enemy.hp -= dmg;
             showLog(`Hit! Dealt ${dmg} dmg.`, true);
         } else {

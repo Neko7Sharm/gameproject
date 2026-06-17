@@ -36,12 +36,16 @@
         <!-- Story Screen -->
         <section id="screen-story" class="screen hidden">
             <div id="story-background" class="bg-layer"></div>
-            <div id="story-character" class="char-layer sena-idle hidden"></div>
+            
+            <div id="char-left" class="vn-char left hidden"></div>
+            <div id="char-right" class="vn-char right hidden"></div>
             
             <div id="dialogue-box" class="dialogue-box">
-                <div id="speaker-name" class="speaker-name">Speaker Name</div>
-                <div id="dialogue-text" class="dialogue-text">Placeholder</div>
-                <div class="click-indicator">▼</div>
+                <div class="dialogue-content-area">
+                    <div id="speaker-name" class="speaker-name">Speaker Name</div>
+                    <div id="dialogue-text" class="dialogue-text">Placeholder</div>
+                    <div class="click-indicator">▼</div>
+                </div>
             </div>
         </section>
 
@@ -60,6 +64,14 @@
                     <h3>Allocate Stats</h3>
                     <p>Points Remaining: <span id="stat-points">5</span></p>
                     
+                    <div class="stat-row-edit">
+                        <span>STR (Basic Attack DMG)</span>
+                        <div>
+                            <button id="btn-dec-str" class="btn small">-</button>
+                            <span id="val-str">0</span>
+                            <button id="btn-inc-str" class="btn small">+</button>
+                        </div>
+                    </div>
                     <div class="stat-row-edit">
                         <span>DEX (Initiative/Fleeing)</span>
                         <div>
@@ -98,6 +110,7 @@
                     <h3>Home - Abandoned House</h3>
                     <div class="status-box">
                         <p><strong>HP:</strong> <span id="home-hp">20/20</span></p>
+                        <p><strong>STR:</strong> <span id="home-str">0</span></p>
                         <p><strong>DEX:</strong> <span id="home-dex">0</span></p>
                         <p><strong>INT:</strong> <span id="home-int">0</span></p>
                         <p><strong>WIS:</strong> <span id="home-wis">0</span></p>

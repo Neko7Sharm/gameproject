@@ -336,6 +336,53 @@ body {
     z-index: 10;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     cursor: pointer;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.vn-char {
+    position: absolute;
+    bottom: 150px;
+    width: 35%;
+    height: 70%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom center;
+    z-index: 5;
+    transition: opacity 0.3s, transform 0.3s, filter 0.3s;
+}
+
+.vn-char.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+.vn-char.left {
+    left: 5%;
+}
+
+.vn-char.right {
+    right: 5%;
+}
+
+.vn-char.active-speaker {
+    filter: brightness(1);
+    transform: scale(1.05);
+    z-index: 6;
+}
+
+.vn-char.inactive-speaker {
+    filter: brightness(0.5);
+    transform: scale(1);
+    z-index: 5;
+}
+
+.dialogue-content-area {
+    flex-grow: 1;
+    position: relative;
+    min-height: 100px;
 }
 
 .speaker-name {
@@ -353,8 +400,8 @@ body {
 
 .click-indicator {
     position: absolute;
-    bottom: 10px;
-    right: 15px;
+    bottom: -10px;
+    right: 0px;
     animation: bounce 1s infinite;
     color: var(--primary-color);
 }
