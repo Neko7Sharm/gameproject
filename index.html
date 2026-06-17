@@ -20,7 +20,7 @@
                 </div>
             </div>
             
-            <!-- Settings Modal (Hidden by default) -->
+            <!-- Settings Modal -->
             <div id="modal-settings" class="modal hidden">
                 <div class="modal-content">
                     <h2>Settings</h2>
@@ -36,18 +36,103 @@
         <!-- Story Screen -->
         <section id="screen-story" class="screen hidden">
             <div id="story-background" class="bg-layer"></div>
-            <div id="story-character" class="char-layer hidden"></div>
+            <div id="story-character" class="char-layer sena-idle hidden"></div>
             
             <div id="dialogue-box" class="dialogue-box">
                 <div id="speaker-name" class="speaker-name">Speaker Name</div>
-                <div id="dialogue-text" class="dialogue-text">This is a placeholder dialogue text. Click to continue.</div>
+                <div id="dialogue-text" class="dialogue-text">Placeholder</div>
                 <div class="click-indicator">▼</div>
+            </div>
+        </section>
+
+        <!-- Character Creation Screen -->
+        <section id="screen-char-create" class="screen hidden">
+            <div class="create-content">
+                <h2>Rebirth Configuration</h2>
+                <div class="element-select">
+                    <h3>Select Magic Element</h3>
+                    <button class="btn secondary selected">Water (Unlocked)</button>
+                    <button class="btn tertiary" disabled>Fire (Locked)</button>
+                    <button class="btn tertiary" disabled>Earth (Locked)</button>
+                </div>
+                
+                <div class="stats-allocation">
+                    <h3>Allocate Stats</h3>
+                    <p>Points Remaining: <span id="stat-points">5</span></p>
+                    
+                    <div class="stat-row-edit">
+                        <span>DEX (Initiative/Fleeing)</span>
+                        <div>
+                            <button id="btn-dec-dex" class="btn small">-</button>
+                            <span id="val-dex">0</span>
+                            <button id="btn-inc-dex" class="btn small">+</button>
+                        </div>
+                    </div>
+                    <div class="stat-row-edit">
+                        <span>INT (Waterball DMG)</span>
+                        <div>
+                            <button id="btn-dec-int" class="btn small">-</button>
+                            <span id="val-int">0</span>
+                            <button id="btn-inc-int" class="btn small">+</button>
+                        </div>
+                    </div>
+                    <div class="stat-row-edit">
+                        <span>WIS (Heal Amount)</span>
+                        <div>
+                            <button id="btn-dec-wis" class="btn small">-</button>
+                            <span id="val-wis">0</span>
+                            <button id="btn-inc-wis" class="btn small">+</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="btn-confirm-char" class="btn primary" disabled>Confirm Rebirth</button>
+            </div>
+        </section>
+
+        <!-- Home Base Screen -->
+        <section id="screen-home" class="screen hidden">
+            <div class="home-bg bg-layer"></div>
+            <div class="home-ui">
+                <div class="home-status">
+                    <h3>Home - Abandoned House</h3>
+                    <div class="status-box">
+                        <p><strong>HP:</strong> <span id="home-hp">20/20</span></p>
+                        <p><strong>DEX:</strong> <span id="home-dex">0</span></p>
+                        <p><strong>INT:</strong> <span id="home-int">0</span></p>
+                        <p><strong>WIS:</strong> <span id="home-wis">0</span></p>
+                    </div>
+                    <div class="inventory-box">
+                        <p><strong>Slime Orbs:</strong> <span id="inv-orbs">0</span></p>
+                        <p><strong>HP Potions:</strong> <span id="inv-pots">0</span></p>
+                    </div>
+                </div>
+                <div class="home-actions">
+                    <button id="btn-home-sleep" class="btn primary">Sleep (Restore HP)</button>
+                    <button id="btn-home-craft" class="btn secondary">Crafting</button>
+                    <button id="btn-home-forest" class="btn primary" style="background-color: #27ae60;">Enter Forest</button>
+                    <button class="btn tertiary" disabled>Enter City (Coming Soon)</button>
+                </div>
+            </div>
+            
+            <!-- Crafting Modal -->
+            <div id="modal-crafting" class="modal hidden">
+                <div class="modal-content">
+                    <h2>Crafting Station</h2>
+                    <p>Current Slime Orbs: <span id="craft-orbs">0</span></p>
+                    <div class="craft-recipe">
+                        <span>1x HP Potion (Heal 10)</span>
+                        <span>Requires: 1 Slime Orb</span>
+                        <button id="btn-craft-potion" class="btn primary">Craft</button>
+                    </div>
+                    <button id="btn-close-crafting" class="btn tertiary" style="margin-top: 20px;">Close</button>
+                </div>
             </div>
         </section>
 
         <!-- Battle Screen -->
         <section id="screen-battle" class="screen hidden">
-            <div id="battle-background" class="bg-layer"></div>
+            <div id="battle-background" class="bg-layer forest-bg"></div>
             
             <!-- Enemy Area -->
             <div class="enemy-area">
@@ -55,34 +140,41 @@
                 <div class="hp-bar-container">
                     <div class="hp-label">Slime</div>
                     <div class="hp-bar"><div id="enemy-hp-fill" class="hp-fill"></div></div>
+                    <div class="hp-text-overlay" id="enemy-hp-text">10/10</div>
                 </div>
             </div>
 
             <!-- Player Area -->
             <div class="player-area">
+                <div class="player-portrait char-layer sena-combat"></div>
+                
                 <div class="player-stats">
                     <div class="stat-row">
                         <span>HP</span>
                         <div class="hp-bar"><div id="player-hp-fill" class="hp-fill"></div></div>
-                        <span id="player-hp-text">100/100</span>
+                        <span id="player-hp-text">20/20</span>
                     </div>
-                    <div class="stat-row">
-                        <span>MP</span>
-                        <div class="mp-bar"><div id="player-mp-fill" class="mp-fill"></div></div>
-                        <span id="player-mp-text">20/20</span>
+                    <div class="stat-row small-text">
+                        <span>Potions: <span id="battle-potions">0</span></span>
                     </div>
                 </div>
 
                 <div class="battle-commands">
                     <button id="cmd-attack" class="btn command">Attack</button>
-                    <button id="cmd-skill" class="btn command">Skill</button>
-                    <button id="cmd-item" class="btn command" disabled>Item</button>
+                    <button id="cmd-skill-waterball" class="btn command skill-btn">Waterball</button>
+                    <button id="cmd-skill-heal" class="btn command skill-btn">Heal</button>
+                    <button id="cmd-item" class="btn command">Item (Potion)</button>
                     <button id="cmd-flee" class="btn command">Flee</button>
                 </div>
             </div>
 
-            <div id="battle-log" class="battle-log">
-                A wild slime appeared!
+            <div id="battle-log" class="battle-log"></div>
+            
+            <div id="dice-overlay" class="dice-overlay hidden">
+                <div class="dice-content">
+                    <div class="dice-icon">🎲</div>
+                    <div class="dice-text" id="dice-text">Rolling...</div>
+                </div>
             </div>
         </section>
     </div>

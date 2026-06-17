@@ -5,18 +5,19 @@
     --secondary-hover: #83a5c8;
     --bg-color: #fcefe9;
     --text-color: #333333;
-    --dialogue-bg: rgba(255, 255, 255, 0.85);
+    --dialogue-bg: rgba(255, 255, 255, 0.9);
     --border-radius: 12px;
     --transition-speed: 0.3s;
     --hp-color: #e74c3c;
     --mp-color: #3498db;
+    --dice-color: #f1c40f;
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    user-select: none; /* Prevent text selection to feel more like an app */
+    user-select: none;
 }
 
 body {
@@ -29,12 +30,11 @@ body {
     overflow: hidden;
 }
 
-/* Landscape game container */
 #game-container {
     width: 100%;
     max-width: 960px;
     height: 100vw;
-    max-height: 540px; /* 16:9 aspect ratio max size */
+    max-height: 540px;
     background-color: var(--bg-color);
     position: relative;
     overflow: hidden;
@@ -83,6 +83,11 @@ body {
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
+.btn.small {
+    padding: 5px 15px;
+    font-size: 1.2rem;
+}
+
 .btn:active {
     transform: translateY(2px);
     box-shadow: 0 2px 3px rgba(0,0,0,0.1);
@@ -119,7 +124,7 @@ body {
     font-size: 4rem;
     font-weight: 900;
     color: var(--primary-color);
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     margin-bottom: 2rem;
     letter-spacing: 2px;
 }
@@ -132,6 +137,118 @@ body {
     margin: 0 auto;
 }
 
+/* Character Creation Screen */
+#screen-char-create {
+    justify-content: center;
+    align-items: center;
+    background: #fdfbfb;
+}
+
+.create-content {
+    background: white;
+    padding: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    width: 80%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.element-select {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.element-select .btn.selected {
+    border: 3px solid var(--primary-color);
+}
+
+.stats-allocation {
+    margin: 20px 0;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.stat-row-edit {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.stat-row-edit span:not([id]) {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.stat-row-edit span[id] {
+    display: inline-block;
+    width: 30px;
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+/* Home Base Screen */
+#screen-home {
+    background: #2c3e50;
+}
+
+.home-bg {
+    background: url('assets/menu_bg.png') no-repeat center center; /* Using menu bg as placeholder for home */
+    background-size: cover;
+    filter: blur(2px) brightness(0.8);
+}
+
+.home-ui {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: white;
+}
+
+.home-status {
+    background: rgba(0,0,0,0.7);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    width: 80%;
+    max-width: 600px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.home-status h3 {
+    width: 100%;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #555;
+    padding-bottom: 10px;
+}
+
+.status-box, .inventory-box {
+    width: 45%;
+}
+
+.status-box p, .inventory-box p {
+    margin: 5px 0;
+    font-size: 1.1rem;
+}
+
+.home-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 /* Modals */
 .modal {
     position: absolute;
@@ -139,15 +256,11 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.6);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 100;
-}
-
-.modal.hidden {
-    display: none;
 }
 
 .modal-content {
@@ -156,13 +269,22 @@ body {
     border-radius: var(--border-radius);
     text-align: center;
     min-width: 300px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 }
 
-.setting-item {
+.setting-item, .craft-recipe {
     margin: 20px 0;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 10px;
     align-items: center;
+}
+
+.craft-recipe {
+    background: #f0f0f0;
+    padding: 15px;
+    border-radius: 8px;
+    font-weight: bold;
 }
 
 /* Story Screen */
@@ -172,21 +294,29 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
+    z-index: 1;
+}
+
+#story-background {
     background: url('assets/story_bg.png') no-repeat center center;
     background-size: cover;
-    z-index: 1;
 }
 
 .char-layer {
     position: absolute;
     bottom: 0;
+    z-index: 2;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom center;
+}
+
+.sena-idle {
     left: 50%;
     transform: translateX(-50%);
-    width: 400px;
-    height: 80%;
-    background: url('assets/hero.png') no-repeat bottom center;
-    background-size: contain;
-    z-index: 2;
+    width: 500px;
+    height: 90%;
+    background-image: url('assets/sena_idle.png');
 }
 
 .dialogue-box {
@@ -196,11 +326,11 @@ body {
     transform: translateX(-50%);
     width: 90%;
     background: var(--dialogue-bg);
-    border: 3px solid white;
+    border: 3px solid var(--secondary-color);
     border-radius: var(--border-radius);
     padding: 20px;
     z-index: 10;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     cursor: pointer;
 }
 
@@ -232,12 +362,13 @@ body {
 
 /* Battle Screen */
 #screen-battle {
-    background: #d4e6f1;
+    background: #222;
 }
 
-#battle-background {
+.forest-bg {
     background: url('assets/story_bg.png') no-repeat center center;
     background-size: cover;
+    filter: brightness(0.7);
 }
 
 .enemy-area {
@@ -254,7 +385,7 @@ body {
     height: 150px;
     background: url('assets/slime.png') no-repeat center center;
     background-size: contain;
-    margin: 0 auto 15px auto;
+    margin: 0 auto 10px auto;
     animation: breath 2s infinite alternate;
 }
 
@@ -268,17 +399,29 @@ body {
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 20px;
+    height: 35%;
     display: flex;
-    justify-content: space-between;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.8);
     color: white;
     z-index: 10;
     border-top: 4px solid var(--secondary-color);
 }
 
+.sena-combat {
+    position: relative;
+    width: 30%;
+    height: 150%;
+    bottom: 50%;
+    background-image: url('assets/sena_combat.png');
+    background-position: bottom left;
+}
+
 .player-stats {
-    width: 40%;
+    width: 30%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .stat-row {
@@ -287,25 +430,32 @@ body {
     gap: 10px;
     margin-bottom: 10px;
     font-weight: bold;
+    font-size: 1.2rem;
 }
 
-.hp-bar-container, .hp-bar, .mp-bar {
-    background: rgba(255,255,255,0.3);
+.stat-row.small-text {
+    font-size: 1rem;
+    color: #ccc;
+}
+
+.hp-bar-container, .hp-bar {
+    background: rgba(255,255,255,0.2);
     border-radius: 10px;
-    height: 15px;
+    height: 20px;
     flex-grow: 1;
     overflow: hidden;
+    position: relative;
 }
 
 .hp-bar-container {
     width: 200px;
-    background: rgba(0,0,0,0.2);
 }
 
 .hp-label {
     font-weight: bold;
-    color: var(--text-color);
+    color: white;
     margin-bottom: 5px;
+    text-shadow: 1px 1px 2px black;
 }
 
 .hp-fill {
@@ -315,28 +465,46 @@ body {
     transition: width 0.3s ease;
 }
 
-.mp-fill {
-    height: 100%;
-    background: var(--mp-color);
+.hp-text-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    transition: width 0.3s ease;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-shadow: 1px 1px 1px black;
 }
 
 .battle-commands {
+    width: 40%;
+    padding: 15px;
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
     gap: 10px;
-    width: 50%;
 }
 
 .btn.command {
-    background: var(--dialogue-bg);
-    color: var(--text-color);
-    border: 2px solid transparent;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 2px solid #555;
+    padding: 10px;
+    font-size: 1.1rem;
 }
 
 .btn.command:hover:not(:disabled) {
     border-color: var(--primary-color);
+    background: rgba(255,255,255,0.2);
+}
+
+.btn.skill-btn {
+    border-color: #3498db;
+    color: #aed6f1;
 }
 
 .battle-log {
@@ -344,16 +512,64 @@ body {
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.8);
     color: white;
-    padding: 10px 20px;
+    padding: 15px 30px;
     border-radius: 20px;
+    font-size: 1.2rem;
     font-weight: bold;
     z-index: 15;
+    text-align: center;
+    border: 2px solid var(--primary-color);
     opacity: 0;
     transition: opacity 0.3s;
+    pointer-events: none;
 }
 
 .battle-log.show {
     opacity: 1;
+}
+
+.dice-overlay {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    background: rgba(0,0,0,0.9);
+    padding: 20px 40px;
+    border-radius: 20px;
+    border: 3px solid var(--dice-color);
+    color: white;
+    text-align: center;
+    animation: popIn 0.3s ease-out;
+}
+
+.dice-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    animation: roll 0.5s ease infinite;
+}
+
+.dice-overlay.resolved .dice-icon {
+    animation: none;
+}
+
+.dice-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--dice-color);
+}
+
+@keyframes popIn {
+    0% { transform: translate(-50%, -30%) scale(0.5); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+@keyframes roll {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(90deg); }
+    50% { transform: rotate(180deg); }
+    75% { transform: rotate(270deg); }
+    100% { transform: rotate(360deg); }
 }
