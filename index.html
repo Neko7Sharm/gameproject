@@ -147,17 +147,29 @@
         <section id="screen-battle" class="screen hidden">
             <div id="battle-background" class="bg-layer forest-bg"></div>
             
-            <!-- Enemy Area -->
+            <!-- Enemy Area (top left) -->
             <div class="enemy-area">
                 <div id="enemy-sprite" class="sprite slime"></div>
                 <div class="hp-bar-container">
-                    <div class="hp-label">Slime</div>
+                    <div class="hp-label" id="enemy-name-label">Slime</div>
                     <div class="hp-bar"><div id="enemy-hp-fill" class="hp-fill"></div></div>
                     <div class="hp-text-overlay" id="enemy-hp-text">10/10</div>
                 </div>
             </div>
 
-            <!-- Player Area -->
+            <!-- Dice Display (center) -->
+            <div id="dice-display" class="dice-display hidden">
+                <div id="dice-container" class="dice-container"></div>
+                <div id="dice-result-text" class="dice-result-text"></div>
+            </div>
+
+            <!-- Battle Log (right side, scrollable) -->
+            <div id="battle-log-panel" class="battle-log-panel">
+                <div class="log-title">Battle Log</div>
+                <div id="battle-log-list" class="battle-log-list"></div>
+            </div>
+
+            <!-- Player Area (bottom) -->
             <div class="player-area">
                 <div class="player-portrait char-layer sena-combat"></div>
                 
@@ -170,23 +182,18 @@
                     <div class="stat-row small-text">
                         <span>Potions: <span id="battle-potions">0</span></span>
                     </div>
+                    <!-- Critical Ticket -->
+                    <button id="cmd-crit-ticket" class="btn crit-ticket" title="Next attack/skill is guaranteed critical!">
+                        🎟️ Critical Ticket
+                    </button>
                 </div>
 
                 <div class="battle-commands">
-                    <button id="cmd-attack" class="btn command">Attack</button>
-                    <button id="cmd-skill-waterball" class="btn command skill-btn">Waterball</button>
-                    <button id="cmd-skill-heal" class="btn command skill-btn">Heal</button>
-                    <button id="cmd-item" class="btn command">Item (Potion)</button>
-                    <button id="cmd-flee" class="btn command">Flee</button>
-                </div>
-            </div>
-
-            <div id="battle-log" class="battle-log"></div>
-            
-            <div id="dice-overlay" class="dice-overlay hidden">
-                <div class="dice-content">
-                    <div class="dice-icon">🎲</div>
-                    <div class="dice-text" id="dice-text">Rolling...</div>
+                    <button id="cmd-attack" class="btn command">⚔️ Attack</button>
+                    <button id="cmd-skill-waterball" class="btn command skill-btn">💧 Waterball</button>
+                    <button id="cmd-skill-heal" class="btn command skill-btn">✨ Heal</button>
+                    <button id="cmd-item" class="btn command">🧪 Item (Potion)</button>
+                    <button id="cmd-flee" class="btn command">🏃 Flee</button>
                 </div>
             </div>
         </section>

@@ -19,6 +19,7 @@ const defaultState = {
         orbs: 0,
         potions: 0
     },
+    critTicketUsed: false,
     enemy: null
 };
 
@@ -295,8 +296,9 @@ function updateCharCreateUI() {
 function initHome() {
     document.getElementById('btn-home-sleep').addEventListener('click', () => {
         gameState.player.hp = gameState.player.maxHp;
+        gameState.critTicketUsed = false; // Restore crit ticket on rest
         updateHomeUI();
-        alert('You slept and recovered all HP!');
+        alert('You slept and recovered all HP! Critical Ticket restored!');
         saveGame();
     });
 
@@ -342,6 +344,58 @@ function updateHomeUI() {
 // --- DnD Battle System ---
 let isPlayerTurn = false;
 let isBattleProcessing = false;
+let critTicketActive = false; // Ticket activated (glowing) - next action is crit
+
+function addLog(msg, type = '') {
+    const list = document.getElementById('battle-log-list');
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    entry.textContent = msg;
+    list.appendChild(entry);
+    list.scrollTop = list.scrollHeight;
+}
+
+// Roll dice visually in center. diceList = [{sides, result}]
+function showDiceRoll(diceList, label) {
+    return new Promise(resolve => {
+        const display = document.getElementById('dice-display');
+        const container = document.getElementById('dice-container');
+        const resultText = document.getElementById('dice-result-text');
+        
+        container.innerHTML = '';
+        resultText.textContent = 'Rolling...';
+        display.classList.remove('hidden');
+        
+        // Create dice elements rolling
+        diceList.forEach(d => {
+            const die = document.createElement('div');
+            die.className = `die d${d.sides} rolling`;
+            die.textContent = '?';
+            container.appendChild(die);
+        });
+        
+        // After 800ms stop rolling and show results
+        setTimeout(() => {
+            const dies = container.querySelectorAll('.die');
+            let isCrit = false;
+            dies.forEach((die, i) => {
+                die.classList.remove('rolling');
+                die.textContent = diceList[i].result;
+                if (diceList[i].sides === 20 && diceList[i].result === 20) {
+                    die.classList.add('crit');
+                    isCrit = true;
+                }
+            });
+            resultText.textContent = label;
+            if (isCrit) resultText.textContent = '⭐ CRITICAL HIT! ' + label;
+            
+            setTimeout(() => {
+                display.classList.add('hidden');
+                resolve(isCrit);
+            }, 1200);
+        }, 800);
+    });
+}
 
 function initBattle() {
     document.getElementById('cmd-attack').addEventListener('click', () => handlePlayerAction('attack'));
@@ -349,6 +403,15 @@ function initBattle() {
     document.getElementById('cmd-skill-heal').addEventListener('click', () => handlePlayerAction('heal'));
     document.getElementById('cmd-item').addEventListener('click', () => handlePlayerAction('item'));
     document.getElementById('cmd-flee').addEventListener('click', () => handlePlayerAction('flee'));
+    
+    const critBtn = document.getElementById('cmd-crit-ticket');
+    critBtn.addEventListener('click', () => {
+        if (gameState.critTicketUsed || critTicketActive) return;
+        critTicketActive = true;
+        critBtn.classList.add('active');
+        critBtn.textContent = '🎟️ ACTIVE - Next action is CRIT!';
+        addLog('🎟️ Critical Ticket activated! Next action is guaranteed critical!', 'crit');
+    });
 }
 
 async function startBattle(isContinue = false) {
@@ -356,23 +419,46 @@ async function startBattle(isContinue = false) {
         gameState.enemy = JSON.parse(JSON.stringify(ENEMY_SLIME));
     }
     isBattleProcessing = true;
+    critTicketActive = false;
+    
+    // Reset crit ticket button
+    const critBtn = document.getElementById('cmd-crit-ticket');
+    if (gameState.critTicketUsed) {
+        critBtn.classList.add('used');
+        critBtn.classList.remove('active');
+        critBtn.textContent = '🎟️ Critical Ticket (Used)';
+        critBtn.setAttribute('disabled', 'true');
+    } else {
+        critBtn.classList.remove('used', 'active');
+        critBtn.textContent = '🎟️ Critical Ticket';
+        critBtn.removeAttribute('disabled');
+    }
+    
+    // Clear log
+    document.getElementById('battle-log-list').innerHTML = '';
+    
     updateBattleUI();
     switchScreen('battle');
     
-    showLog(`A wild ${gameState.enemy.name} appeared!`, true);
-    await new Promise(r => setTimeout(r, 1500));
+    addLog(`⚔️ A wild ${gameState.enemy.name} appeared!`, 'system');
+    await new Promise(r => setTimeout(r, 800));
 
     // Initiative Roll
-    const playerInit = rollDice(20) + gameState.player.stats.dex;
-    const enemyInit = rollDice(20); // Slime dex 0
+    const playerRoll = rollDice(20);
+    const enemyRoll = rollDice(20);
+    const playerInit = playerRoll + gameState.player.stats.dex;
+    const enemyInit = enemyRoll;
     
-    await showDiceRoll(`Init: Sena(${playerInit}) vs Slime(${enemyInit})`);
+    await showDiceRoll(
+        [{sides: 20, result: playerRoll}],
+        `Initiative: Sena ${playerInit} vs Slime ${enemyInit}`
+    );
     
     if (playerInit >= enemyInit) {
-        showLog('Sena goes first!', true);
+        addLog(`Sena goes first! (${playerInit} vs ${enemyInit})`, 'system');
         isPlayerTurn = true;
     } else {
-        showLog('Slime goes first!', true);
+        addLog(`Slime goes first! (${enemyInit} vs ${playerInit})`, 'system');
         isPlayerTurn = false;
     }
     
@@ -395,57 +481,87 @@ function updateBattleUI() {
 async function handlePlayerAction(action) {
     if (!isPlayerTurn || isBattleProcessing) return;
     isBattleProcessing = true;
+    
+    const usedCrit = critTicketActive;
+    if (usedCrit) {
+        // Consume ticket
+        critTicketActive = false;
+        gameState.critTicketUsed = true;
+        const critBtn = document.getElementById('cmd-crit-ticket');
+        critBtn.classList.remove('active');
+        critBtn.classList.add('used');
+        critBtn.textContent = '🎟️ Critical Ticket (Used)';
+        critBtn.setAttribute('disabled', 'true');
+    }
 
     if (action === 'flee') {
         const roll = rollDice(20);
         const total = roll + gameState.player.stats.dex;
-        await showDiceRoll(`Flee: d20(${roll}) + DEX(${gameState.player.stats.dex}) = ${total}`);
+        await showDiceRoll([{sides: 20, result: roll}], `Flee: ${roll} + DEX(${gameState.player.stats.dex}) = ${total} vs DC 5`);
         
         if (total > 5) {
-            showLog('Escaped successfully!', true);
+            addLog(`Sena fled successfully! (${total} > 5)`, 'player');
             setTimeout(() => {
                 updateHomeUI();
                 switchScreen('home');
             }, 1500);
             return;
         } else {
-            showLog('Failed to escape!', true);
+            addLog(`Failed to flee! (${total} ≤ 5)`, 'player');
         }
     } 
     else if (action === 'attack') {
-        const atkRoll = rollDice(20);
-        await showDiceRoll(`Atk Roll: d20(${atkRoll}) vs AC ${gameState.enemy.ac}`);
+        const atkRoll = usedCrit ? 20 : rollDice(20);
+        const isCrit = atkRoll === 20;
+        await showDiceRoll([{sides: 20, result: atkRoll}], `Atk Roll: ${atkRoll} vs AC ${gameState.enemy.ac}`);
         
         if (atkRoll >= gameState.enemy.ac) {
-            const dmg = rollDice(4) + gameState.player.stats.str;
+            const baseDmg = rollDice(4) + gameState.player.stats.str;
+            const dmg = isCrit ? baseDmg * 2 : baseDmg;
             gameState.enemy.hp -= dmg;
-            showLog(`Hit! Dealt ${dmg} dmg.`, true);
+            if (isCrit) {
+                addLog(`💥 CRITICAL HIT! Dealt ${dmg} dmg (${baseDmg} × 2)!`, 'crit');
+            } else {
+                addLog(`Sena hit for ${dmg} dmg (1d4+STR).`, 'player');
+            }
         } else {
-            showLog('Missed!', true);
+            addLog(`Sena missed! (${atkRoll} < AC ${gameState.enemy.ac})`, 'player');
         }
     }
     else if (action === 'waterball') {
-        // Assume magic hits automatically or needs save, let's say it just hits for now
-        const dmg = rollDice(8) + gameState.player.stats.int;
-        await showDiceRoll(`Waterball: d8 + INT = ${dmg} dmg`);
+        const r1 = usedCrit ? 8 : rollDice(8);
+        const baseDmg = r1 + gameState.player.stats.int;
+        const dmg = usedCrit ? baseDmg * 2 : baseDmg;
+        await showDiceRoll([{sides: 8, result: r1}], `Waterball: ${r1} + INT(${gameState.player.stats.int}) = ${dmg} dmg${usedCrit ? ' ×2 CRIT' : ''}`);
         gameState.enemy.hp -= dmg;
-        showLog(`Waterball hit for ${dmg} dmg!`, true);
+        if (usedCrit) {
+            addLog(`💥 CRIT Waterball for ${dmg} dmg!`, 'crit');
+        } else {
+            addLog(`Waterball hit for ${dmg} dmg!`, 'player');
+        }
     }
     else if (action === 'heal') {
-        const heal = rollDice(8) + rollDice(8) + gameState.player.stats.wis;
-        await showDiceRoll(`Heal: 2d8 + WIS = ${heal} HP`);
+        const r1 = rollDice(8);
+        const r2 = rollDice(8);
+        const baseHeal = r1 + r2 + gameState.player.stats.wis;
+        const heal = usedCrit ? baseHeal * 2 : baseHeal;
+        await showDiceRoll([{sides: 8, result: r1}, {sides: 8, result: r2}], `Heal: ${r1}+${r2}+WIS(${gameState.player.stats.wis}) = ${heal} HP${usedCrit ? ' ×2 CRIT' : ''}`);
         gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + heal);
-        showLog(`Sena recovered ${heal} HP!`, true);
+        if (usedCrit) {
+            addLog(`💥 CRIT Heal! Sena recovered ${heal} HP!`, 'crit');
+        } else {
+            addLog(`Sena healed ${heal} HP (2d8+WIS).`, 'player');
+        }
     }
     else if (action === 'item') {
         if (gameState.inventory.potions > 0) {
             gameState.inventory.potions--;
             gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + 10);
-            showLog(`Used Potion! Recovered 10 HP.`, true);
+            addLog(`Used HP Potion! Recovered 10 HP.`, 'player');
         } else {
-            showLog(`No potions left!`, true);
+            addLog(`No potions left!`, 'system');
             isBattleProcessing = false;
-            return; // Don't end turn
+            return;
         }
     }
 
@@ -454,40 +570,40 @@ async function handlePlayerAction(action) {
 }
 
 async function enemyTurn() {
-    showLog(`${gameState.enemy.name} attacks!`, true);
-    await new Promise(r => setTimeout(r, 1000));
+    addLog(`Slime is attacking...`, 'enemy');
+    await new Promise(r => setTimeout(r, 600));
     
     const atkRoll = rollDice(20);
-    await showDiceRoll(`Slime Atk: d20(${atkRoll}) vs AC ${gameState.player.ac}`);
+    await showDiceRoll([{sides: 20, result: atkRoll}], `Slime Atk: ${atkRoll} vs AC ${gameState.player.ac}`);
     
     if (atkRoll >= gameState.player.ac) {
-        const dmg = rollDice(gameState.enemy.attackDie);
-        gameState.player.hp -= dmg;
-        showLog(`Slime hit Sena for ${dmg} dmg!`, true);
+        const dmgRoll = rollDice(gameState.enemy.attackDie);
+        await showDiceRoll([{sides: gameState.enemy.attackDie, result: dmgRoll}], `Slime Dmg: ${dmgRoll}`);
+        gameState.player.hp -= dmgRoll;
+        addLog(`Slime hit Sena for ${dmgRoll} dmg!`, 'enemy');
     } else {
-        showLog(`Slime missed!`, true);
+        addLog(`Slime missed! (${atkRoll} < AC ${gameState.player.ac})`, 'enemy');
     }
     
     updateBattleUI();
-    setTimeout(checkBattleState, 1500);
+    setTimeout(checkBattleState, 1000);
 }
 
 function checkBattleState() {
     if (gameState.enemy.hp <= 0) {
-        showLog(`Victory! Slime dropped 1 Slime Orb.`, true);
+        addLog(`🏆 Victory! ${gameState.enemy.name} defeated! Got 1 Slime Orb.`, 'system');
         gameState.inventory.orbs++;
         setTimeout(() => {
             updateHomeUI();
             switchScreen('home');
-        }, 2000);
+        }, 2500);
     } else if (gameState.player.hp <= 0) {
-        showLog(`Sena was defeated...`, true);
+        addLog(`💀 Sena was defeated...`, 'system');
         setTimeout(() => {
-            // Respawn at home with 1 HP for this demo
             gameState.player.hp = 1;
             updateHomeUI();
             switchScreen('home');
-            alert('You fainted and woke up at home...');
+            alert('Sena fainted and woke up at home...');
         }, 2000);
     } else {
         isPlayerTurn = !isPlayerTurn;
